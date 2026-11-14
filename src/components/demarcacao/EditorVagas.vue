@@ -145,6 +145,7 @@ onUnmounted(() => {
     class="editor-vagas"
     :class="`editor-vagas--${modo}`"
     :viewBox="`0 0 ${largura} ${altura}`"
+    :style="{ maxWidth: `calc(70vh * ${largura / altura})` }"
     role="application"
     aria-label="Editor de vagas. N cria uma vaga, Esc cancela o desenho, Delete remove a vaga selecionada."
     @pointerdown="aoPressionar"
@@ -201,10 +202,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* A largura máxima (no template) limita a altura a 70% da tela, mantendo a proporção do frame */
 .editor-vagas {
   display: block;
   width: 100%;
   height: auto;
+  margin-inline: auto;
   touch-action: none;
   user-select: none;
 }

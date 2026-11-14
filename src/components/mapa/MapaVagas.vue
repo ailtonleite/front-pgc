@@ -34,6 +34,12 @@ const viewBox = computed(() => {
   return largura && altura ? `${x} ${y} ${largura} ${altura}` : undefined
 })
 
+/** Limita a altura a 60% da tela, mantendo a proporção do `viewBox`. */
+const estilo = computed(() => {
+  const { largura, altura } = caixa.value
+  return largura && altura ? { maxWidth: `calc(60vh * ${largura / altura})` } : undefined
+})
+
 const tamanhoPadrao = computed(() => Math.max(caixa.value.largura, caixa.value.altura) / 80 || 8)
 
 const itens = computed(() =>
@@ -65,6 +71,7 @@ function selecionar(vaga) {
     class="mapa-vagas"
     :class="{ 'mapa-vagas--com-fundo': comFundo }"
     :viewBox="viewBox"
+    :style="estilo"
     preserveAspectRatio="xMidYMid meet"
     role="group"
     aria-label="Mapa de vagas"
@@ -116,6 +123,7 @@ function selecionar(vaga) {
   display: block;
   width: 100%;
   height: auto;
+  margin-inline: auto;
 }
 
 .vaga__fundo {

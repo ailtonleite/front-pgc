@@ -17,8 +17,12 @@ function medirImagem(url) {
 
 /**
  * @param {string | import('vue').Ref<string>} cameraId se for um ref e mudar, o frame é recarregado
+ * @param {object} [opcoes]
+ * @param {number | null | import('vue').MaybeRefOrGetter<number | null>} [opcoes.atualizarACada]
+ *   intervalo em ms entre capturas (contado a partir do fim da anterior); `null` desliga.
+ *   Para depois de um erro, para não repetir a falha; `recarregar()` retoma.
  */
-export function useFrameCamera(cameraId) {
+export function useFrameCamera(cameraId, { atualizarACada = null } = {}) {
   const url = ref(null)
   const largura = ref(0)
   const altura = ref(0)
@@ -27,15 +31,25 @@ export function useFrameCamera(cameraId) {
 
   // Identifica a requisição mais recente, para descartar respostas atrasadas
   let versao = 0
+  let timer = null
 
   function liberarUrl() {
     if (url.value) URL.revokeObjectURL(url.value)
     url.value = null
   }
 
-  /** Captura um novo frame (revoga a URL anterior). */
+  /** Agenda a próxima captura automática, se ligada. */
+  function agendar() {
+    clearTimeout(timer)
+    timer = null
+    const intervalo = toValue(atualizarACada)
+    if (intervalo && !erro.value && !carregando.value) timer = setTimeout(recarregar, intervalo)
+  }
+
+  /** Captura um novo frame. A imagem anterior continua na tela até a nova carregar. */
   async function recarregar() {
     const minhaVersao = ++versao
+    clearTimeout(timer)
     carregando.value = true
     erro.value = null
 
@@ -59,15 +73,20 @@ export function useFrameCamera(cameraId) {
         ? 'Não foi possível conectar à câmera.'
         : 'Não foi possível obter a imagem da câmera.'
     } finally {
-      if (minhaVersao === versao) carregando.value = false
+      if (minhaVersao === versao) {
+        carregando.value = false
+        agendar()
+      }
     }
   }
 
   watch(() => toValue(cameraId), recarregar, { immediate: true })
+  watch(() => toValue(atualizarACada), agendar)
 
   // Equivale ao `onUnmounted` em um componente, e também funciona dentro de um `effectScope`
   onScopeDispose(() => {
     versao++
+    clearTimeout(timer)
     liberarUrl()
   })
 

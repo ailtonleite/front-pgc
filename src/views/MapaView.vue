@@ -31,8 +31,12 @@ const { sessao, vagaId: vagaDaSessao } = storeToRefs(sessaoStore)
 const estacionamentoId = computed(() => route.params.id)
 const { conectado } = useEventosVagas(estacionamentoId)
 
+/** Intervalo entre capturas da imagem de fundo (o monitoramento processa ~1 frame por segundo). */
+const INTERVALO_IMAGEM_MS = 2000
+
 const nomeEstacionamento = ref('')
 const nomesCameras = ref({})
+const camerasMonitoradas = ref(new Set())
 const cameraAtiva = ref(null)
 const vagaSelecionadaId = ref(null)
 const dialogoAberto = ref(false)
@@ -55,6 +59,7 @@ function nomeCamera(cameraId, indice) {
 async function carregar(id) {
   nomeEstacionamento.value = ''
   nomesCameras.value = {}
+  camerasMonitoradas.value = new Set()
   mostrarImagem.value = false
 
   // Complementos do mapa: uma falha aqui não impede a exibição das vagas
@@ -65,6 +70,7 @@ async function carregar(id) {
     camerasApi.listar(id).then((lista) => {
       if (id === estacionamentoId.value) {
         nomesCameras.value = Object.fromEntries(lista.map((camera) => [camera.id, camera.nome]))
+        camerasMonitoradas.value = new Set(lista.filter((camera) => camera.ativa).map((camera) => camera.id))
       }
     }).catch(() => {})
   }
@@ -85,9 +91,17 @@ onUnmounted(() => ocupacaoStore.limpar())
 const escopoFrames = effectScope()
 const frames = reactive({})
 
+/** Só a aba visível, com a imagem ligada e a câmera em monitoramento, é atualizada. */
+function intervaloImagem(cameraId) {
+  const visivel = mostrarImagem.value && cameraAtiva.value === cameraId
+  return visivel && camerasMonitoradas.value.has(cameraId) ? INTERVALO_IMAGEM_MS : null
+}
+
 watch([mostrarImagem, cameraAtiva], ([mostrar, cameraId]) => {
   if (mostrar && cameraId && !frames[cameraId]) {
-    frames[cameraId] = escopoFrames.run(() => useFrameCamera(cameraId))
+    frames[cameraId] = escopoFrames.run(() =>
+      useFrameCamera(cameraId, { atualizarACada: () => intervaloImagem(cameraId) }),
+    )
   }
 })
 
@@ -159,7 +173,7 @@ async function encerrar() {
         <v-window-item v-for="cameraId in idsCameras" :key="cameraId" :value="cameraId">
           <div class="pa-4">
             <v-progress-linear
-              v-if="mostrarImagem && frames[cameraId]?.carregando"
+              v-if="mostrarImagem && frames[cameraId]?.carregando && !frames[cameraId]?.url"
               indeterminate
               color="primary"
               class="mb-2"
@@ -172,6 +186,9 @@ async function encerrar() {
               class="mb-2"
             >
               {{ frames[cameraId].erro }}
+              <template #append>
+                <v-btn variant="text" size="small" @click="frames[cameraId].recarregar()">Tentar novamente</v-btn>
+              </template>
             </v-alert>
             <MapaVagas
               :vagas="vagasPorCamera[cameraId]"

@@ -23,7 +23,7 @@ const contador = computed(() => `${vagas.value.length} ${vagas.value.length === 
     >
       Cancelar desenho
     </v-btn>
-    <v-btn v-else prepend-icon="mdi-plus" color="primary" variant="tonal" title="N" @click="novaVaga()">
+    <v-btn v-else prepend-icon="mdi-plus" color="primary" variant="flat" title="N" @click="novaVaga()">
       Nova vaga
     </v-btn>
     <v-btn

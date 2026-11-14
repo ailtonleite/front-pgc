@@ -16,6 +16,7 @@ Para cada item: o problema, o impacto no front, a sugestão de correção e o co
 | 6 | Nome da câmera no mapa do motorista | Média | Abas numeradas |
 | 7 | Atribuição de admin por e-mail | Média | Campo de id |
 | 8 | Listar os admins de um estacionamento | Média | Não lista |
+| 12 | Imagem da câmera fora de sincronia com o monitoramento | Média | Atualiza a cada 2 s |
 | 9 | Falta `GET /cameras/{id}` | Baixa | Parâmetro na URL |
 | 10 | Falta `GET /estacionamentos/{id}` | Baixa | Lista tudo e filtra |
 | 11 | Polígonos que se cruzam são corrigidos em silêncio | Baixa | Não há |
@@ -100,6 +101,33 @@ O `POST` continua usando `EstacionamentoIn`, com `nome` obrigatório.
 **Impacto.** O `AdminsDialog` não mostra quem já é responsável, o que dificulta a remoção.
 
 **Sugestão.** `GET /estacionamentos/{id}/admins`.
+
+### 12. Imagem da câmera fora de sincronia com o monitoramento
+
+**Problema.** `GET /cameras/{id}/frame` (`CameraManager.capturar_frame`) abre uma fonte nova a cada chamada, separada da fonte usada pelo laço de monitoramento (`_laco_captura`):
+
+- **Câmera `arquivo`:** `VideoFileSource.abrir` volta o vídeo ao início, então a rota devolve sempre o primeiro frame, enquanto o monitoramento avança no tempo.
+- **Câmera RTSP ou Kinesis:** cada chamada abre uma conexão nova, o que leva segundos, e a imagem não é a mesma que gerou a detecção.
+
+**Impacto.** Com "Mostrar imagem da câmera" ligado no mapa, as vagas mudam em tempo real, mas a imagem de fundo fica parada (`arquivo`) ou dessincronizada (RTSP).
+
+**Sugestão.** Guardar no `CameraManager` o último frame lido pelo laço de cada câmera e devolvê-lo na rota enquanto o monitoramento estiver ativo:
+
+```python
+# em _laco_captura, depois de ler o frame
+self._ultimos_frames[camera.id] = frame
+
+# em capturar_frame, antes de abrir uma fonte nova
+if (frame := self._ultimos_frames.get(camera_id)) is not None:
+    return frame.copy()
+
+# no finally de _laco_captura
+self._ultimos_frames.pop(camera.id, None)
+```
+
+Assim a imagem é exatamente a que gerou o status das vagas, e cada atualização no front custa só uma codificação JPEG, sem conexão nova com a câmera. Com a câmera parada, a rota continua abrindo a fonte, como hoje.
+
+**Contorno no front.** Com a imagem ligada, a `MapaView` busca o frame de novo a cada 2 s, mas só para a aba aberta e se a câmera estiver em monitoramento. Com o back-end atual, a imagem continua parada em câmeras `arquivo`. Com a sugestão aplicada, ela passa a acompanhar o mapa sem mudanças no front.
 
 ---
 

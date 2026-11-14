@@ -71,8 +71,9 @@ const dados = computed(() => {
 })
 
 const opcoes = computed(() => {
-  const cores = tema.current.value.colors
-  const texto = cores['on-surface']
+  const { colors: cores, dark } = tema.current.value
+  // Dentro de componentes que fornecem tema (ex.: v-card), o Vuetify 3.13 não inclui as cores `on-*`
+  const texto = cores['on-surface'] ?? (dark ? '#FFFFFF' : '#000000')
   return {
     responsive: true,
     maintainAspectRatio: false,
