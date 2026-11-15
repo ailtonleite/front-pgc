@@ -27,7 +27,16 @@ const itens = computed(() => [
 
 <template>
   <v-app-bar color="primary" density="comfortable">
-    <v-app-bar-nav-icon aria-label="Abrir menu" @click="menuAberto = !menuAberto" />
+    <v-tooltip text="Menu" location="bottom">
+      <template #activator="{ props: ativador }">
+        <v-app-bar-nav-icon
+          v-bind="ativador"
+          :aria-label="menuAberto ? 'Fechar menu' : 'Abrir menu'"
+          :aria-expanded="menuAberto"
+          @click="menuAberto = !menuAberto"
+        />
+      </template>
+    </v-tooltip>
     <v-app-bar-title>Estacionamento UFABC</v-app-bar-title>
     <template #append>
       <span class="d-none d-sm-inline mr-2">{{ usuario?.nome }}</span>

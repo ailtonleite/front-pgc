@@ -7,6 +7,7 @@ import { useRoute } from 'vue-router'
 import * as estacionamentosApi from '@/api/estacionamentos'
 import * as historicoApi from '@/api/historico'
 import { usePeriodo } from '@/composables/usePeriodo'
+import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 import CardsRelatorio from '@/components/historico/CardsRelatorio.vue'
 import FiltroPeriodo from '@/components/historico/FiltroPeriodo.vue'
@@ -62,7 +63,7 @@ watch([estacionamentoId, periodo.params], async ([id, params]) => {
 <template>
   <v-container>
     <div class="d-flex flex-wrap align-center ga-2 mb-4">
-      <v-btn icon="mdi-arrow-left" variant="text" aria-label="Voltar" :to="{ name: 'admin-estacionamentos' }" />
+      <BotaoIcone icone="mdi-arrow-left" rotulo="Voltar para os estacionamentos" :to="{ name: 'admin-estacionamentos' }" />
       <div>
         <h1 class="text-h5">Histórico{{ nomeEstacionamento ? ` — ${nomeEstacionamento}` : '' }}</h1>
         <div class="text-body-2 text-medium-emphasis">{{ descricao }}</div>

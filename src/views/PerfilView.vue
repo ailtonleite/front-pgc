@@ -6,7 +6,9 @@ import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificacaoStore } from '@/stores/notificacao'
+import { vFormatar } from '@/directives/formatar'
 import { REGEX_PLACA } from '@/utils/constantes'
+import { formatarPlaca } from '@/utils/placa'
 
 const authStore = useAuthStore()
 const { usuario } = storeToRefs(authStore)
@@ -19,7 +21,7 @@ const enviando = ref(false)
 const regrasPlaca = [(v) => !v?.trim() || REGEX_PLACA.test(v.trim()) || 'Use o formato AAA1234 ou AAA1A23.']
 
 watch(() => usuario.value?.placa, (atual) => {
-  placa.value = atual ?? ''
+  placa.value = formatarPlaca(atual)
 }, { immediate: true })
 
 async function enviar(novaPlaca, mensagem) {
@@ -37,7 +39,7 @@ async function enviar(novaPlaca, mensagem) {
 async function salvar() {
   const { valid } = await formulario.value.validate()
   if (!valid) return
-  const novaPlaca = placa.value.trim() || null
+  const novaPlaca = formatarPlaca(placa.value) || null
   await enviar(novaPlaca, novaPlaca ? 'Placa atualizada.' : 'Placa removida.')
 }
 
@@ -66,7 +68,11 @@ function remover() {
           </p>
           <v-text-field
             v-model="placa"
+            v-formatar="formatarPlaca"
             label="Placa"
+            autocapitalize="characters"
+            autocomplete="off"
+            spellcheck="false"
             :rules="regrasPlaca"
             hint="AAA1234 ou AAA1A23"
             persistent-hint

@@ -13,6 +13,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useNotificacaoStore } from '@/stores/notificacao'
 import { useOcupacaoStore } from '@/stores/ocupacao'
 import { useSessaoStore } from '@/stores/sessao'
+import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 import CardMinhaVaga from '@/components/mapa/CardMinhaVaga.vue'
 import CardsTotais from '@/components/mapa/CardsTotais.vue'
@@ -137,7 +138,7 @@ async function encerrar() {
 <template>
   <v-container>
     <div class="d-flex flex-wrap align-center ga-2 mb-4">
-      <v-btn icon="mdi-arrow-left" variant="text" aria-label="Voltar" :to="{ name: 'inicio' }" />
+      <BotaoIcone icone="mdi-arrow-left" rotulo="Voltar para os estacionamentos" :to="{ name: 'inicio' }" />
       <h1 class="text-h5">{{ nomeEstacionamento || 'Mapa de vagas' }}</h1>
       <v-spacer />
       <v-switch

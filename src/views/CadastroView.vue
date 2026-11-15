@@ -5,7 +5,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { vFormatar } from '@/directives/formatar'
 import { REGEX_PLACA } from '@/utils/constantes'
+import { formatarPlaca } from '@/utils/placa'
 
 const TAMANHO_MIN_SENHA = 8 // mesma regra do back-end
 
@@ -38,7 +40,7 @@ async function cadastrar() {
       nome: nome.value.trim(),
       email: email.value.trim(),
       senha: senha.value,
-      placa: placa.value.trim() || null,
+      placa: formatarPlaca(placa.value) || null,
     })
     await router.replace('/')
   } catch {
@@ -78,7 +80,11 @@ async function cadastrar() {
           />
           <v-text-field
             v-model="placa"
+            v-formatar="formatarPlaca"
             label="Placa do veículo (opcional)"
+            autocapitalize="characters"
+            autocomplete="off"
+            spellcheck="false"
             :rules="regras.placa"
             hint="AAA1234 ou AAA1A23"
             persistent-hint

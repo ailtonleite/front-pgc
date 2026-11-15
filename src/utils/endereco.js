@@ -42,6 +42,17 @@ export function formatarCep(cep) {
 }
 
 /**
+ * Máscara do CEP durante a digitação: só dígitos, no máximo 8, com hífen depois do 5º
+ * (`092105` → `09210-5`). Idempotente, para uso com `v-formatar`.
+ * @param {string | null | undefined} valor
+ * @returns {string}
+ */
+export function mascararCep(valor) {
+  const digitos = somenteDigitosCep(valor).slice(0, 8)
+  return digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos
+}
+
+/**
  * Endereço vazio, para iniciar o formulário.
  * @returns {Record<string, string>}
  */

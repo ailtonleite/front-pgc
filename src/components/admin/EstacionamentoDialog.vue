@@ -8,13 +8,14 @@
  * (todos menos o complemento) passarem a ser exigidos.
  */
 import { computed, reactive, ref, watch } from 'vue'
+import { vFormatar } from '@/directives/formatar'
 import {
   CAMPOS_ENDERECO,
   UFS,
   cepValido,
   enderecoEstaVazio,
   enderecoVazio,
-  formatarCep,
+  mascararCep,
   paraEnderecoIn,
 } from '@/utils/endereco'
 
@@ -60,7 +61,7 @@ watch(aberto, (valor) => {
   Object.assign(endereco, enderecoVazio())
   if (atual?.endereco) {
     for (const campo of CAMPOS_ENDERECO) endereco[campo] = atual.endereco[campo] ?? ''
-    endereco.cep = formatarCep(endereco.cep)
+    endereco.cep = mascararCep(endereco.cep)
   }
   ativo.value = atual?.ativo ?? true
   formulario.value?.resetValidation()
@@ -70,11 +71,6 @@ watch(aberto, (valor) => {
 watch(semEndereco, (vazio) => {
   if (vazio) formulario.value?.resetValidation()
 })
-
-/** Formata o CEP ao sair do campo, sem atrapalhar a digitação. */
-function aoSairDoCep() {
-  if (cepValido(endereco.cep)) endereco.cep = formatarCep(endereco.cep)
-}
 
 async function salvar() {
   const { valid } = await formulario.value.validate()
@@ -100,12 +96,12 @@ async function salvar() {
               <v-col cols="12" sm="4">
                 <v-text-field
                   v-model="endereco.cep"
+                  v-formatar="mascararCep"
                   label="CEP"
                   placeholder="00000-000"
                   inputmode="numeric"
-                  maxlength="10"
+                  autocomplete="postal-code"
                   :rules="regras.cep"
-                  @blur="aoSairDoCep"
                 />
               </v-col>
               <v-col cols="12" sm="8">

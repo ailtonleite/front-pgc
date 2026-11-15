@@ -3,6 +3,7 @@
  * Painel lateral da demarcação: rótulo, erros e remoção de cada vaga (`inject('editor')`).
  */
 import { inject } from 'vue'
+import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 
 const { vagas, selecionada, erros, selecionar, renomear, remover } = inject('editor')
@@ -35,11 +36,11 @@ const { vagas, selecionada, erros, selecionar, renomear, remover } = inject('edi
         @focus="selecionar(vaga.chave)"
       />
       <template #append>
-        <v-btn
-          icon="mdi-delete"
-          variant="text"
+        <BotaoIcone
+          icone="mdi-delete"
+          dica="Remover vaga"
+          :rotulo="`Remover vaga ${vaga.rotulo}`"
           size="small"
-          :aria-label="`Remover vaga ${vaga.rotulo}`"
           @click.stop="remover(vaga.chave)"
         />
       </template>

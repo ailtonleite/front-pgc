@@ -9,6 +9,7 @@ import * as estacionamentosApi from '@/api/estacionamentos'
 import { useNotificacaoStore } from '@/stores/notificacao'
 import { TIPOS_FONTE } from '@/utils/constantes'
 import CameraDialog from '@/components/admin/CameraDialog.vue'
+import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import ConfirmarDialog from '@/components/comum/ConfirmarDialog.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 
@@ -115,7 +116,7 @@ async function remover() {
 <template>
   <v-container>
     <div class="d-flex flex-wrap align-center ga-2 mb-4">
-      <v-btn icon="mdi-arrow-left" variant="text" aria-label="Voltar" :to="{ name: 'admin-estacionamentos' }" />
+      <BotaoIcone icone="mdi-arrow-left" rotulo="Voltar para os estacionamentos" :to="{ name: 'admin-estacionamentos' }" />
       <div>
         <h1 class="text-h5">Câmeras</h1>
         <div v-if="nomeEstacionamento" class="text-body-2 text-medium-emphasis">{{ nomeEstacionamento }}</div>
@@ -164,11 +165,11 @@ async function remover() {
             </v-btn>
             <v-btn prepend-icon="mdi-pencil" @click="abrirDialogo(camera)">Editar</v-btn>
             <v-spacer />
-            <v-btn
-              icon="mdi-delete"
+            <BotaoIcone
+              icone="mdi-delete"
+              dica="Remover câmera"
+              :rotulo="`Remover ${camera.nome}`"
               color="error"
-              variant="text"
-              :aria-label="`Remover ${camera.nome}`"
               @click="confirmarRemocao(camera)"
             />
           </v-card-actions>

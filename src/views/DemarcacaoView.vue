@@ -9,6 +9,7 @@ import * as camerasApi from '@/api/cameras'
 import { useEditorVagas } from '@/composables/useEditorVagas'
 import { useFrameCamera } from '@/composables/useFrameCamera'
 import { useNotificacaoStore } from '@/stores/notificacao'
+import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import ConfirmarDialog from '@/components/comum/ConfirmarDialog.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 import BarraDemarcacao from '@/components/demarcacao/BarraDemarcacao.vue'
@@ -112,11 +113,10 @@ onUnmounted(() => window.removeEventListener('beforeunload', aoFecharAba))
 <template>
   <v-container fluid>
     <div class="d-flex flex-wrap align-center ga-2 mb-2">
-      <v-btn
+      <BotaoIcone
         v-if="estacionamentoId"
-        icon="mdi-arrow-left"
-        variant="text"
-        aria-label="Voltar para as câmeras"
+        icone="mdi-arrow-left"
+        rotulo="Voltar para as câmeras"
         :to="{ name: 'admin-cameras', params: { id: estacionamentoId } }"
       />
       <div>

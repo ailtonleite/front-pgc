@@ -7,6 +7,7 @@ import * as estacionamentosApi from '@/api/estacionamentos'
 import { useNotificacaoStore } from '@/stores/notificacao'
 import AdminsDialog from '@/components/admin/AdminsDialog.vue'
 import EstacionamentoDialog from '@/components/admin/EstacionamentoDialog.vue'
+import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import ConfirmarDialog from '@/components/comum/ConfirmarDialog.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 import { formatarEndereco, formatarLocalidade, formatarLogradouro } from '@/utils/endereco'
@@ -167,11 +168,42 @@ onMounted(carregar)
         </template>
         <template #[`item.acoes`]="{ item }">
           <div class="d-flex justify-end">
-            <v-btn icon="mdi-pencil" variant="text" size="small" :aria-label="`Editar ${item.nome}`" @click="abrirEdicao(item)" />
-            <v-btn icon="mdi-account-key" variant="text" size="small" :aria-label="`Administradores de ${item.nome}`" @click="abrirAdmins(item)" />
-            <v-btn icon="mdi-cctv" variant="text" size="small" :aria-label="`Câmeras de ${item.nome}`" :to="{ name: 'admin-cameras', params: { id: item.id } }" />
-            <v-btn icon="mdi-chart-line" variant="text" size="small" :aria-label="`Histórico de ${item.nome}`" :to="{ name: 'admin-historico', params: { id: item.id } }" />
-            <v-btn icon="mdi-delete" variant="text" size="small" color="error" :aria-label="`Remover ${item.nome}`" @click="confirmarRemocao(item)" />
+            <BotaoIcone
+              icone="mdi-pencil"
+              dica="Editar"
+              :rotulo="`Editar ${item.nome}`"
+              size="small"
+              @click="abrirEdicao(item)"
+            />
+            <BotaoIcone
+              icone="mdi-account-key"
+              dica="Administradores"
+              :rotulo="`Administradores de ${item.nome}`"
+              size="small"
+              @click="abrirAdmins(item)"
+            />
+            <BotaoIcone
+              icone="mdi-cctv"
+              dica="Câmeras"
+              :rotulo="`Câmeras de ${item.nome}`"
+              size="small"
+              :to="{ name: 'admin-cameras', params: { id: item.id } }"
+            />
+            <BotaoIcone
+              icone="mdi-chart-line"
+              dica="Histórico de ocupação"
+              :rotulo="`Histórico de ${item.nome}`"
+              size="small"
+              :to="{ name: 'admin-historico', params: { id: item.id } }"
+            />
+            <BotaoIcone
+              icone="mdi-delete"
+              dica="Remover"
+              :rotulo="`Remover ${item.nome}`"
+              size="small"
+              color="error"
+              @click="confirmarRemocao(item)"
+            />
           </div>
         </template>
       </v-data-table>
