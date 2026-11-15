@@ -9,6 +9,7 @@ import * as ocupacaoApi from '@/api/ocupacao'
 import { useAuthStore } from '@/stores/auth'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 import CardsTotais from '@/components/mapa/CardsTotais.vue'
+import { formatarLocalidade, formatarLogradouro } from '@/utils/endereco'
 
 const { eAdmin } = storeToRefs(useAuthStore())
 
@@ -59,7 +60,13 @@ onMounted(carregar)
         <v-card class="h-100 d-flex flex-column">
           <v-card-item>
             <v-card-title as="h2" class="text-h6">{{ estacionamento.nome }}</v-card-title>
-            <v-card-subtitle v-if="estacionamento.endereco">{{ estacionamento.endereco }}</v-card-subtitle>
+            <address v-if="estacionamento.endereco" class="endereco text-body-2 text-medium-emphasis">
+              <v-icon icon="mdi-map-marker" size="small" class="mr-1" aria-hidden="true" />
+              <span>
+                {{ formatarLogradouro(estacionamento.endereco) }}<br>
+                {{ formatarLocalidade(estacionamento.endereco) }}
+              </span>
+            </address>
             <template v-if="!estacionamento.ativo" #append>
               <v-chip size="small" color="warning">Inativo</v-chip>
             </template>
@@ -100,3 +107,12 @@ onMounted(carregar)
     </v-row>
   </v-container>
 </template>
+
+<style scoped>
+.endereco {
+  display: flex;
+  align-items: flex-start;
+  font-style: normal;
+  margin-top: 4px;
+}
+</style>

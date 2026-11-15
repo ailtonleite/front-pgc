@@ -10,15 +10,21 @@ export async function listar() {
   return data
 }
 
-/** @returns {Promise<EstacionamentoOut>} */
+/**
+ * `EnderecoIn`: `{ rua, numero, complemento?, bairro, cidade, estado, cep }`
+ * (ver `utils/endereco.js#paraEnderecoIn`).
+ * @param {{nome: string, endereco?: object | null, ativo?: boolean}} dados
+ * @returns {Promise<EstacionamentoOut>}
+ */
 export async function criar({ nome, endereco, ativo }) {
   const { data } = await http.post('/estacionamentos', { nome, endereco, ativo })
   return data
 }
 
 /**
+ * O `endereco` é substituído por inteiro (envie todos os campos); `endereco: null` remove o endereço.
  * @param {string} id
- * @param {{nome?: string, endereco?: string | null, ativo?: boolean}} campos só os campos enviados mudam
+ * @param {{nome?: string, endereco?: object | null, ativo?: boolean}} campos só os campos enviados mudam
  * @returns {Promise<EstacionamentoOut>}
  */
 export async function editar(id, campos) {

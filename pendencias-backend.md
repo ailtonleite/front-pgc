@@ -8,7 +8,7 @@ Para cada item: o problema, o impacto no front, a sugestão de correção e o co
 
 | # | Pendência | Prioridade | Contorno no front |
 |---|---|---|---|
-| 1 | `PUT /estacionamentos/{id}` exige `nome` | Alta | Sim |
+| 1 | ~~`PUT /estacionamentos/{id}` exige `nome`~~ | Resolvido | — |
 | 2 | CORS em produção | Alta (produção) | Não há |
 | 3 | Cookie entre domínios em produção | Alta (produção) | Não há |
 | 4 | Salvar vagas recria os ids e quebra as sessões | Média | Aviso ao salvar |
@@ -25,7 +25,9 @@ Para cada item: o problema, o impacto no front, a sugestão de correção e o co
 
 ## Prioridade alta
 
-### 1. `PUT /estacionamentos/{id}` exige `nome`
+### 1. `PUT /estacionamentos/{id}` exige `nome` (resolvido)
+
+> **Resolvido.** O back-end passou a usar `EstacionamentoEdicaoIn`, e o switch "Ativo" agora envia só `{ ativo }`.
 
 **Problema.** A rota usa `EstacionamentoIn`, em que `nome: str` é obrigatório. A docstring da rota diz "altera apenas os campos enviados", e o serviço já trata isso: `editar` só valida `nome` se ele vier nos campos. Mas o Pydantic recusa a requisição antes, com 422, quando o `nome` não é enviado.
 

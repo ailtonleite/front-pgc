@@ -9,12 +9,14 @@ import AdminsDialog from '@/components/admin/AdminsDialog.vue'
 import EstacionamentoDialog from '@/components/admin/EstacionamentoDialog.vue'
 import ConfirmarDialog from '@/components/comum/ConfirmarDialog.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
+import { formatarEndereco, formatarLocalidade, formatarLogradouro } from '@/utils/endereco'
 
 const notificacao = useNotificacaoStore()
 
 const CABECALHOS = [
   { title: 'Nome', key: 'nome' },
-  { title: 'Endereço', key: 'endereco' },
+  // Ordena pelo texto do endereço, não pelo objeto
+  { title: 'Endereço', key: 'endereco', sortRaw: (a, b) => formatarEndereco(a.endereco).localeCompare(formatarEndereco(b.endereco)) },
   { title: 'Ativo', key: 'ativo', width: 100 },
   { title: 'Ações', key: 'acoes', sortable: false, align: 'end' },
 ]
@@ -50,8 +52,8 @@ function substituir(atualizado) {
 async function alternarAtivo(estacionamento, ativo) {
   alternando.value = estacionamento.id
   try {
-    // `nome` vai junto porque o `EstacionamentoIn` do back-end o exige também na edição
-    substituir(await estacionamentosApi.editar(estacionamento.id, { nome: estacionamento.nome, ativo }))
+    // A edição é parcial (`EstacionamentoEdicaoIn`): só `ativo` muda
+    substituir(await estacionamentosApi.editar(estacionamento.id, { ativo }))
   } catch {
     // Erro já mostrado; o switch volta ao valor anterior
   } finally {
@@ -144,7 +146,13 @@ onMounted(carregar)
         loading-text="Carregando…"
         aria-label="Estacionamentos"
       >
-        <template #[`item.endereco`]="{ value }">{{ value || '—' }}</template>
+        <template #[`item.endereco`]="{ value }">
+          <template v-if="value">
+            <div>{{ formatarLogradouro(value) }}</div>
+            <div class="text-caption text-medium-emphasis">{{ formatarLocalidade(value) }}</div>
+          </template>
+          <template v-else>—</template>
+        </template>
         <template #[`item.ativo`]="{ item }">
           <v-switch
             :model-value="item.ativo"

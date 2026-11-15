@@ -5,11 +5,14 @@
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { PAPEIS_EXIBICAO } from '@/utils/constantes'
 
 const authStore = useAuthStore()
 const { usuario, eAdmin, eMotorista } = storeToRefs(authStore)
 
 const menuAberto = ref(false)
+
+const papel = computed(() => PAPEIS_EXIBICAO[usuario.value?.papel] ?? null)
 
 const itens = computed(() => [
   { titulo: 'Estacionamentos', icone: 'mdi-parking', rota: { name: 'inicio' } },
@@ -38,7 +41,18 @@ const itens = computed(() => [
       :subtitle="usuario?.email"
       prepend-icon="mdi-account-circle"
       class="py-4"
-    />
+    >
+      <v-chip
+        v-if="papel"
+        :prepend-icon="papel.icone"
+        color="primary"
+        size="small"
+        variant="tonal"
+        class="mt-2"
+      >
+        {{ papel.rotulo }}
+      </v-chip>
+    </v-list-item>
     <v-divider />
     <v-list nav>
       <v-list-item

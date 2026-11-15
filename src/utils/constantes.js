@@ -30,10 +30,18 @@ export const STATUS = Object.freeze({
   }),
 })
 
-/** Papéis de usuário (`usuario.papel`). */
+/** Papéis de usuário (`usuario.papel`), iguais ao `Role` do back-end. */
 export const PAPEIS = Object.freeze({
   ADMIN: 'ADMIN',
   MOTORISTA: 'MOTORISTA',
+  VISITANTE: 'VISITANTE',
+})
+
+/** Rótulo e ícone de cada papel, para exibição. */
+export const PAPEIS_EXIBICAO = Object.freeze({
+  ADMIN: Object.freeze({ rotulo: 'Administrador', icone: 'mdi-shield-account' }),
+  MOTORISTA: Object.freeze({ rotulo: 'Motorista', icone: 'mdi-car' }),
+  VISITANTE: Object.freeze({ rotulo: 'Visitante', icone: 'mdi-account-outline' }),
 })
 
 /** Opções do `v-select` de tipo de fonte da câmera (`title`/`value` do Vuetify). */
