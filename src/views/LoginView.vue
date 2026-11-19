@@ -5,6 +5,8 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { NOME_SISTEMA } from '@/utils/constantes'
+import logo from '@/images/logo-estacionai.png'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -42,9 +44,11 @@ async function entrar() {
 <template>
   <v-container class="fill-height justify-center">
     <v-card width="100%" max-width="420" class="pa-2">
+      <div class="d-flex justify-center pt-4">
+        <img :src="logo" :alt="NOME_SISTEMA" width="192" height="96">
+      </div>
       <v-card-item>
         <v-card-title as="h1" class="text-h5">Entrar</v-card-title>
-        <v-card-subtitle>Estacionamento UFABC</v-card-subtitle>
       </v-card-item>
       <v-form @submit.prevent="entrar">
         <v-card-text>

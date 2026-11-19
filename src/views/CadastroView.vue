@@ -6,7 +6,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { vFormatar } from '@/directives/formatar'
-import { REGEX_PLACA } from '@/utils/constantes'
+import { NOME_SISTEMA, REGEX_PLACA } from '@/utils/constantes'
+import logo from '@/images/logo-estacionai.png'
 import { formatarPlaca } from '@/utils/placa'
 
 const TAMANHO_MIN_SENHA = 8 // mesma regra do back-end
@@ -54,6 +55,9 @@ async function cadastrar() {
 <template>
   <v-container class="fill-height justify-center">
     <v-card width="100%" max-width="480" class="pa-2">
+      <div class="d-flex justify-center pt-4">
+        <img :src="logo" :alt="NOME_SISTEMA" width="160" height="80">
+      </div>
       <v-card-item>
         <v-card-title as="h1" class="text-h5">Criar conta</v-card-title>
         <v-card-subtitle>Cadastro de motorista</v-card-subtitle>

@@ -2,6 +2,9 @@
  * Constantes compartilhadas pela interface. Sem dependências de Vue.
  */
 
+/** Nome do sistema, usado no título da aba e no texto alternativo do logo. */
+export const NOME_SISTEMA = 'EstacionAI'
+
 /**
  * Apresentação de cada `SpotStatus` do back-end.
  * - `cor`: token do tema Vuetify (ver `plugins/vuetify.js`)

@@ -34,10 +34,10 @@ const routes = [
     component: () => import('@/views/MapaView.vue'),
   },
   {
+    // Todos os papéis; a tela mostra as seções de cada um (placa, estacionamentos administrados)
     path: '/perfil',
     name: 'perfil',
     component: () => import('@/views/PerfilView.vue'),
-    meta: { papel: PAPEIS.MOTORISTA },
   },
   {
     path: '/admin/estacionamentos',

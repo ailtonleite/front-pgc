@@ -1,14 +1,16 @@
 <script setup>
 /**
  * Barra superior com menu lateral. Lê a `authStore` diretamente.
+ * O logo fica no menu lateral; na barra verde, só o nome (o logo verde não teria contraste).
  */
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
-import { PAPEIS_EXIBICAO } from '@/utils/constantes'
+import { NOME_SISTEMA, PAPEIS_EXIBICAO } from '@/utils/constantes'
+import logo from '@/images/logo-estacionai.png'
 
 const authStore = useAuthStore()
-const { usuario, eAdmin, eMotorista } = storeToRefs(authStore)
+const { usuario, eAdmin } = storeToRefs(authStore)
 
 const menuAberto = ref(false)
 
@@ -21,7 +23,7 @@ const itens = computed(() => [
     icone: 'mdi-cog',
     rota: { name: 'admin-estacionamentos' },
   },
-  eMotorista.value && { titulo: 'Meu perfil', icone: 'mdi-account', rota: { name: 'perfil' } },
+  { titulo: 'Meu perfil', icone: 'mdi-account', rota: { name: 'perfil' } },
 ].filter(Boolean))
 </script>
 
@@ -37,7 +39,7 @@ const itens = computed(() => [
         />
       </template>
     </v-tooltip>
-    <v-app-bar-title>Estacionamento UFABC</v-app-bar-title>
+    <v-app-bar-title>{{ NOME_SISTEMA }}</v-app-bar-title>
     <template #append>
       <span class="d-none d-sm-inline mr-2">{{ usuario?.nome }}</span>
       <v-btn prepend-icon="mdi-logout" variant="text" @click="authStore.sair()">Sair</v-btn>
@@ -45,6 +47,9 @@ const itens = computed(() => [
   </v-app-bar>
 
   <v-navigation-drawer v-model="menuAberto" temporary>
+    <div class="d-flex justify-center pt-5 pb-2">
+      <img :src="logo" :alt="NOME_SISTEMA" width="128" height="64">
+    </div>
     <v-list-item
       :title="usuario?.nome"
       :subtitle="usuario?.email"
