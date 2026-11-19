@@ -9,6 +9,7 @@ import * as ocupacaoApi from '@/api/ocupacao'
 import { useAuthStore } from '@/stores/auth'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
 import CardsTotais from '@/components/mapa/CardsTotais.vue'
+import imagemListaVazia from '@/images/placa-lista-vazia.png'
 import { formatarLocalidade, formatarLogradouro } from '@/utils/endereco'
 
 const { eAdmin } = storeToRefs(useAuthStore())
@@ -48,7 +49,7 @@ onMounted(carregar)
 
     <EstadoVazio
       v-else-if="!estacionamentos.length"
-      icone="mdi-parking"
+      :imagem="imagemListaVazia"
       titulo="Nenhum estacionamento disponível"
       :texto="eAdmin ? 'Cadastre um estacionamento para começar.' : 'Tente novamente mais tarde.'"
     >

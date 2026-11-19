@@ -32,6 +32,8 @@ export default createVuetify({
           livre: '#2E7D32',
           ocupada: '#C62828',
           desconhecida: '#757575',
+          // Selo das vagas preferenciais (azul do Símbolo Internacional de Acesso)
+          preferencial: '#1565C0',
         },
       },
     },

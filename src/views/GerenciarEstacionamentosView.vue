@@ -10,6 +10,7 @@ import EstacionamentoDialog from '@/components/admin/EstacionamentoDialog.vue'
 import BotaoIcone from '@/components/comum/BotaoIcone.vue'
 import ConfirmarDialog from '@/components/comum/ConfirmarDialog.vue'
 import EstadoVazio from '@/components/comum/EstadoVazio.vue'
+import imagemListaVazia from '@/images/placa-lista-vazia.png'
 import { formatarEndereco, formatarLocalidade, formatarLogradouro } from '@/utils/endereco'
 
 const notificacao = useNotificacaoStore()
@@ -134,7 +135,7 @@ onMounted(carregar)
 
     <EstadoVazio
       v-if="!carregando && !estacionamentos.length"
-      icone="mdi-parking"
+      :imagem="imagemListaVazia"
       titulo="Nenhum estacionamento sob sua responsabilidade"
       texto="Crie um estacionamento para cadastrar câmeras e demarcar vagas."
     />

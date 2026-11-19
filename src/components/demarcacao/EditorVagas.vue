@@ -6,6 +6,7 @@
  */
 import { computed, inject, onMounted, onUnmounted, ref } from 'vue'
 import { pontoNoFrame } from '@/composables/useEditorVagas'
+import { PREFERENCIAL } from '@/utils/constantes'
 import { centroide, pontosSvg } from '@/utils/geometria'
 
 const props = defineProps({
@@ -45,6 +46,7 @@ const itens = computed(() =>
     pontos: pontosSvg(vaga.poligono),
     centro: centroide(vaga.poligono),
     erro: erros.value[vaga.chave],
+    preferencial: vaga.preferencial,
   })),
 )
 
@@ -173,6 +175,19 @@ onUnmounted(() => {
       >
         {{ item.rotulo }}
       </text>
+      <!-- Selo de vaga preferencial, logo abaixo do rótulo -->
+      <foreignObject
+        v-if="item.preferencial"
+        class="vaga__selo"
+        :x="item.centro.x - 11 * escala"
+        :y="item.centro.y + 10 * escala"
+        :width="22 * escala"
+        :height="22 * escala"
+      >
+        <div class="selo-preferencial">
+          <v-icon :icon="PREFERENCIAL.icone" :size="16 * escala" color="white" />
+        </div>
+      </foreignObject>
     </g>
 
     <template v-if="vagaSelecionada && modo === 'selecao'">
@@ -250,6 +265,21 @@ onUnmounted(() => {
   text-anchor: middle;
   dominant-baseline: central;
   pointer-events: none;
+}
+
+.vaga__selo {
+  pointer-events: none;
+}
+
+.selo-preferencial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-preferencial));
+  box-shadow: 0 0 0 1px white;
 }
 
 .vertice {

@@ -29,12 +29,17 @@ export const useOcupacaoStore = defineStore('ocupacao', () => {
   })
 
   /** Mesma regra de `OccupancySnapshot` no back-end: `DESCONHECIDA` conta só no total. */
-  const totais = computed(() => {
-    const total = vagas.value.length
-    const livres = vagas.value.filter((vaga) => vaga.status === 'LIVRE').length
-    const ocupadas = vagas.value.filter((vaga) => vaga.status === 'OCUPADA').length
+  function contar(lista) {
+    const total = lista.length
+    const livres = lista.filter((vaga) => vaga.status === 'LIVRE').length
+    const ocupadas = lista.filter((vaga) => vaga.status === 'OCUPADA').length
     return { total, livres, ocupadas, taxa_ocupacao: total ? ocupadas / total : 0 }
-  })
+  }
+
+  const totais = computed(() => contar(vagas.value))
+
+  /** Só as vagas preferenciais; acompanham os eventos SSE como os totais gerais. */
+  const totaisPreferenciais = computed(() => contar(vagas.value.filter((vaga) => vaga.preferencial)))
 
   /**
    * Busca as vagas. Sem argumento, ressincroniza o estacionamento atual (ex.: após queda do SSE),
@@ -83,6 +88,7 @@ export const useOcupacaoStore = defineStore('ocupacao', () => {
     vagas,
     vagasPorCamera,
     totais,
+    totaisPreferenciais,
     carregar,
     atualizarVaga,
     limpar,

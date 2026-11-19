@@ -23,8 +23,14 @@ export function pontoNoFrame(evento, svg) {
 }
 
 export function useEditorVagas() {
-  /** `chave` é um id local, pois vagas novas ainda não têm id do servidor. */
+  /**
+   * `{ chave, id, rotulo, poligono, preferencial }`. `chave` identifica a vaga no editor;
+   * `id` é o do servidor (`null` nas vagas novas). Enviar o `id` faz o back-end atualizar
+   * a vaga existente, mantendo o status e as sessões dos motoristas.
+   */
   const vagas = ref([])
+  /** Ids das vagas vindas do servidor na última carga, para saber quais foram removidas. */
+  const idsCarregados = ref(new Set())
   const selecionada = ref(null)
   const pontosEmDesenho = ref([])
   const modo = ref('selecao')
@@ -53,6 +59,12 @@ export function useEditorVagas() {
 
   const valido = computed(() => Object.keys(erros.value).length === 0)
 
+  /** Vagas já salvas que o admin removeu: salvar encerra as sessões abertas nelas. */
+  const removidas = computed(() => {
+    const atuais = new Set(vagas.value.map((vaga) => vaga.id).filter(Boolean))
+    return [...idsCarregados.value].filter((id) => !atuais.has(id)).length
+  })
+
   function buscar(chave) {
     return vagas.value.find((vaga) => vaga.chave === chave)
   }
@@ -76,9 +88,12 @@ export function useEditorVagas() {
   function carregar(vagasOut) {
     vagas.value = vagasOut.map((vaga) => ({
       chave: vaga.id,
+      id: vaga.id,
       rotulo: vaga.rotulo,
       poligono: vaga.poligono.map(({ x, y }) => ({ x, y })),
+      preferencial: Boolean(vaga.preferencial),
     }))
+    idsCarregados.value = new Set(vagasOut.map((vaga) => vaga.id))
     selecionada.value = null
     pontosEmDesenho.value = []
     modo.value = 'selecao'
@@ -99,7 +114,13 @@ export function useEditorVagas() {
     if (pontosEmDesenho.value.length < PONTOS_POR_VAGA) return
 
     const chave = `nova-${++contador}`
-    vagas.value.push({ chave, rotulo: sugerirRotulo(), poligono: pontosEmDesenho.value })
+    vagas.value.push({
+      chave,
+      id: null,
+      rotulo: sugerirRotulo(),
+      poligono: pontosEmDesenho.value,
+      preferencial: false,
+    })
     pontosEmDesenho.value = []
     modo.value = 'selecao'
     selecionada.value = chave
@@ -143,6 +164,13 @@ export function useEditorVagas() {
     alterado.value = true
   }
 
+  function definirPreferencial(chave, preferencial) {
+    const vaga = buscar(chave)
+    if (!vaga || vaga.preferencial === preferencial) return
+    vaga.preferencial = preferencial
+    alterado.value = true
+  }
+
   function remover(chave) {
     vagas.value = vagas.value.filter((vaga) => vaga.chave !== chave)
     if (selecionada.value === chave) selecionada.value = null
@@ -150,11 +178,16 @@ export function useEditorVagas() {
     alterado.value = true
   }
 
-  /** Converte para `VagaIn[]`, pronto para `PUT /cameras/{id}/vagas`. */
+  /**
+   * Converte para `VagaIn[]`, pronto para `PUT /cameras/{id}/vagas`.
+   * Com `id`, o back-end atualiza a vaga existente; sem `id`, cria uma nova.
+   */
   function paraPayload() {
     return vagas.value.map((vaga) => ({
+      ...(vaga.id ? { id: vaga.id } : {}),
       rotulo: vaga.rotulo.trim(),
       poligono: vaga.poligono.map(({ x, y }) => ({ x, y })),
+      preferencial: vaga.preferencial,
     }))
   }
 
@@ -166,6 +199,7 @@ export function useEditorVagas() {
     alterado,
     erros,
     valido,
+    removidas,
     carregar,
     novaVaga,
     clicar,
@@ -176,6 +210,7 @@ export function useEditorVagas() {
     mover,
     soltar,
     renomear,
+    definirPreferencial,
     remover,
     paraPayload,
   }

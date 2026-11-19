@@ -11,12 +11,14 @@ Para cada item: o problema, o impacto no front, a sugestão de correção e o co
 | 1 | ~~`PUT /estacionamentos/{id}` exige `nome`~~ | Resolvido | — |
 | 2 | CORS em produção | Alta (produção) | Não há |
 | 3 | Cookie entre domínios em produção | Alta (produção) | Não há |
-| 4 | Salvar vagas recria os ids e quebra as sessões | Média | Aviso ao salvar |
+| 4 | ~~Salvar vagas recria os ids e quebra as sessões~~ | Resolvido | — |
 | 5 | Admin não vê o mapa de estacionamento inativo | Média | Oculta o mapa |
 | 6 | Nome da câmera no mapa do motorista | Média | Abas numeradas |
 | 7 | Atribuição de admin por e-mail | Média | Campo de id |
 | 8 | Listar os admins de um estacionamento | Média | Não lista |
 | 12 | Imagem da câmera fora de sincronia com o monitoramento | Média | Atualiza a cada 2 s |
+| 13 | Histórico por minuto | Média | Não há (retorna 422) |
+| 14 | Vaga preferencial | Média | Não há (o campo é ignorado) |
 | 9 | Falta `GET /cameras/{id}` | Baixa | Parâmetro na URL |
 | 10 | Falta `GET /estacionamentos/{id}` | Baixa | Lista tudo e filtra |
 | 11 | Polígonos que se cruzam são corrigidos em silêncio | Baixa | Não há |
@@ -62,7 +64,9 @@ O `POST` continua usando `EstacionamentoIn`, com `nome` obrigatório.
 
 ## Prioridade média
 
-### 4. Salvar as vagas recria os ids e quebra as sessões
+### 4. Salvar as vagas recria os ids e quebra as sessões (resolvido)
+
+> **Resolvido.** `VagaIn` aceita `id`, e o editor envia o `id` das vagas existentes. A `DemarcacaoView` só pede confirmação quando uma vaga já salva é removida, pois isso encerra as sessões abertas nela.
 
 **Problema.** `PUT /cameras/{id}/vagas` substitui todas as vagas da câmera e gera ids novos. As sessões ativas de motoristas apontam para o `vaga_id` antigo, que deixa de existir. Isso acontece mesmo quando o admin só renomeia uma vaga ou ajusta um vértice.
 
@@ -130,6 +134,90 @@ self._ultimos_frames.pop(camera.id, None)
 Assim a imagem é exatamente a que gerou o status das vagas, e cada atualização no front custa só uma codificação JPEG, sem conexão nova com a câmera. Com a câmera parada, a rota continua abrindo a fonte, como hoje.
 
 **Contorno no front.** Com a imagem ligada, a `MapaView` busca o frame de novo a cada 2 s, mas só para a aba aberta e se a câmera estiver em monitoramento. Com o back-end atual, a imagem continua parada em câmeras `arquivo`. Com a sugestão aplicada, ela passa a acompanhar o mapa sem mudanças no front.
+
+### 13. Histórico por minuto
+
+**Problema.** O front oferece a granularidade "Por minuto" (atalho "Última hora" e períodos personalizados de até 1 hora), mas o back-end só aceita `hora`, `dia` e `semana`:
+
+- `GET /estacionamentos/{id}/historico` declara `granularidade: Literal["hora", "dia", "semana"]` e responde 422 para `minuto`.
+- `HistoryService` tem `GRANULARIDADES = {"hora", "dia", "semana"}`, e `_inicio_periodo` zera os minutos antes de qualquer agrupamento.
+- O snapshot é gravado a cada 5 minutos (`intervalo_snapshot_min = 5.0`). Mesmo aceitando `minuto`, o gráfico teria só 12 pontos por hora.
+
+**Impacto.** O atalho "Última hora" e a opção "Por minuto" mostram o erro do back-end e não exibem dados. As demais opções continuam funcionando.
+
+**Sugestão.**
+
+```python
+# core/services.py
+GRANULARIDADES = {"minuto", "hora", "dia", "semana"}
+
+def _inicio_periodo(self, momento: datetime, granularidade: str) -> datetime:
+    local = momento.astimezone(self.fuso).replace(second=0, microsecond=0)
+    if granularidade == "minuto":
+        return local
+    local = local.replace(minute=0)
+    if granularidade == "hora":
+        return local
+    local = local.replace(hour=0)
+    if granularidade == "dia":
+        return local
+    return local - timedelta(days=local.weekday())  # semana começa na segunda-feira
+
+# api/routes.py (rota do histórico)
+granularidade: Literal["minuto", "hora", "dia", "semana"] = Query("hora"),
+
+# main.py (Settings), ou APP_INTERVALO_SNAPSHOT_MIN=1 no ambiente
+intervalo_snapshot_min: float = 1.0
+```
+
+Com snapshot a cada minuto, o histórico cresce 5 vezes mais rápido (1.440 registros por estacionamento por dia). Se isso pesar, uma alternativa é manter os snapshots por minuto só nas últimas 24 h e agregar os mais antigos por hora.
+
+**Contorno no front.** "Por minuto" fica desabilitado para períodos maiores que 1 hora, então a consulta nunca passa de 61 pontos.
+
+### 14. Vaga preferencial
+
+**Problema.** Na demarcação, o admin pode marcar uma vaga como preferencial, e o mapa mostra essas vagas e quantas estão livres e ocupadas. O back-end ainda não tem esse campo: o `preferencial` enviado em `PUT /cameras/{id}/vagas` é ignorado (o Pydantic descarta campos extras) e não volta em `VagaOut`.
+
+**Impacto.** A marcação se perde ao salvar. O mapa não mostra o selo nem o card de vagas preferenciais.
+
+**Sugestão.** Um campo booleano na vaga, do modelo até a API e a persistência:
+
+```python
+# core/models.py
+class ParkingSpot:
+    ...
+    preferencial: bool = False
+
+class Demarcacao:
+    ...
+    preferencial: bool = False
+
+# core/services.py, em definir_vagas
+if demarcacao.id:
+    vaga = atuais.pop(demarcacao.id)
+    vaga.rotulo = rotulo
+    vaga.poligono = list(demarcacao.poligono)
+    vaga.preferencial = demarcacao.preferencial
+else:
+    vaga = ParkingSpot(..., preferencial=demarcacao.preferencial)
+
+# api/schemas.py
+class VagaIn(BaseModel):
+    ...
+    preferencial: bool = False      # e repassar em para_entidade()
+
+class VagaOut(BaseModel):
+    ...
+    preferencial: bool              # e preencher em de_entidade()
+
+# adapters/database.py (DynamoDB)
+# _para_item: "preferencial": vaga.preferencial
+# _de_item:   preferencial=bool(item.get("preferencial", False))  # itens antigos não têm o campo
+```
+
+Opcional: incluir os totais de preferenciais em `TotaisOut` (`preferenciais_total`, `preferenciais_livres`, `preferenciais_ocupadas`) para a lista de estacionamentos também mostrá-los. O mapa não depende disso, pois calcula os totais a partir das vagas.
+
+**Contorno no front.** O front já envia e lê o campo. Vagas sem `preferencial` na resposta são tratadas como comuns. Com a sugestão aplicada, tudo passa a funcionar sem mudanças no front.
 
 ---
 

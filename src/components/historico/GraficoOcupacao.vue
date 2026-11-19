@@ -44,9 +44,10 @@ function semanaIso(data) {
   return Math.ceil(((dia - inicioAno) / 86_400_000 + 1) / 7)
 }
 
-/** Eixo X: hora "14h", dia "25/10", semana "sem. 43". */
+/** Eixo X: minuto "14:05", hora "14h", dia "25/10", semana "sem. 43". */
 function rotuloEixo(iso) {
   const data = new Date(iso)
+  if (props.granularidade === 'minuto') return `${doisDigitos(data.getHours())}:${doisDigitos(data.getMinutes())}`
   if (props.granularidade === 'hora') return `${data.getHours()}h`
   if (props.granularidade === 'dia') return `${doisDigitos(data.getDate())}/${doisDigitos(data.getMonth() + 1)}`
   return `sem. ${semanaIso(data)}`

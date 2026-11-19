@@ -30,6 +30,16 @@ export const STATUS = Object.freeze({
   }),
 })
 
+/**
+ * Apresentação das vagas preferenciais (idosos, PcD etc.). É uma característica da vaga,
+ * independente do status: o mapa mostra o selo por cima da cor de livre/ocupada.
+ */
+export const PREFERENCIAL = Object.freeze({
+  rotulo: 'Preferencial',
+  cor: 'preferencial',
+  icone: 'mdi-wheelchair-accessibility',
+})
+
 /** Papéis de usuário (`usuario.papel`), iguais ao `Role` do back-end. */
 export const PAPEIS = Object.freeze({
   ADMIN: 'ADMIN',
@@ -51,12 +61,19 @@ export const TIPOS_FONTE = Object.freeze([
   { value: 'kinesis', title: 'Amazon Kinesis Video' },
 ])
 
-/** Opções de granularidade do histórico (`title`/`value` do Vuetify). */
+/**
+ * Opções de granularidade do histórico (`title`/`value` do Vuetify).
+ * `minuto` só vale para intervalos de até `LIMITE_POR_MINUTO_MS` (60 pontos no gráfico).
+ */
 export const GRANULARIDADES = Object.freeze([
+  { value: 'minuto', title: 'Por minuto' },
   { value: 'hora', title: 'Por hora' },
   { value: 'dia', title: 'Por dia' },
   { value: 'semana', title: 'Por semana' },
 ])
+
+/** Maior intervalo do histórico com granularidade `minuto`: 1 hora. */
+export const LIMITE_POR_MINUTO_MS = 60 * 60 * 1000
 
 /**
  * Placa no formato antigo (`AAA1234`) ou Mercosul (`AAA1A23`).

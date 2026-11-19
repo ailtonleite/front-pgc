@@ -40,6 +40,11 @@ let versao = 0
 
 watch([estacionamentoId, periodo.params], async ([id, params]) => {
   const minhaVersao = ++versao
+  // Período incompleto ou inválido: o filtro mostra o erro; mantém os dados anteriores
+  if (!params) {
+    carregando.value = false
+    return
+  }
   carregando.value = true
   try {
     const [novosSnapshots, novoRelatorio] = await Promise.all([

@@ -3,7 +3,7 @@
  * Vagas de uma câmera desenhadas em SVG. Coordenadas em pixels do frame original.
  */
 import { computed, useId } from 'vue'
-import { STATUS } from '@/utils/constantes'
+import { PREFERENCIAL, STATUS } from '@/utils/constantes'
 import { area, caixaEnvolvente, centroide, pontosSvg } from '@/utils/geometria'
 import PadroesStatus from './PadroesStatus.vue'
 
@@ -46,17 +46,25 @@ const itens = computed(() =>
   props.vagas.map((vaga) => {
     const status = STATUS[vaga.status] ?? STATUS.DESCONHECIDA
     const destacada = vaga.id === props.vagaDestacada
+    const preferencial = Boolean(vaga.preferencial)
     const fonte = Math.max(Math.sqrt(area(vaga.poligono)) / 4, 1)
+    const partes = [
+      `Vaga ${vaga.rotulo}`,
+      preferencial && 'preferencial',
+      status.rotulo.toLowerCase(),
+      destacada && 'sua vaga',
+    ]
     return {
       vaga,
       status,
       destacada,
+      preferencial,
       fonte,
       pontos: pontosSvg(vaga.poligono),
       centro: centroide(vaga.poligono),
       cor: `rgb(var(--v-theme-${status.cor}))`,
       padrao: status.padrao && `url(#${prefixo}-${status.padrao})`,
-      descricao: `Vaga ${vaga.rotulo}, ${status.rotulo.toLowerCase()}${destacada ? ', sua vaga' : ''}`,
+      descricao: partes.filter(Boolean).join(', '),
     }
   }),
 )
@@ -103,6 +111,19 @@ function selecionar(vaga) {
       >
         {{ item.vaga.rotulo }}
       </text>
+      <!-- Selo de vaga preferencial, logo abaixo do rótulo -->
+      <foreignObject
+        v-if="item.preferencial"
+        class="vaga__selo"
+        :x="item.centro.x - item.fonte * 0.45"
+        :y="item.centro.y + item.fonte * 0.6"
+        :width="item.fonte * 0.9"
+        :height="item.fonte * 0.9"
+      >
+        <div class="selo-preferencial">
+          <v-icon :icon="PREFERENCIAL.icone" :size="item.fonte * 0.65" color="white" />
+        </div>
+      </foreignObject>
       <foreignObject
         v-if="item.destacada"
         :x="item.centro.x - item.fonte * 0.75"
@@ -136,8 +157,20 @@ function selecionar(vaga) {
 
 .vaga__padrao,
 .vaga__rotulo,
-.vaga__icone {
+.vaga__icone,
+.vaga__selo {
   pointer-events: none;
+}
+
+.selo-preferencial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-preferencial));
+  box-shadow: 0 0 0 1px white;
 }
 
 .vaga__borda {

@@ -1,10 +1,15 @@
 <script setup>
 /**
- * Legenda com cor, padrão, ícone e texto de cada status.
+ * Legenda com cor, padrão, ícone e texto de cada status, e o selo de vaga preferencial.
  */
 import { useId } from 'vue'
-import { STATUS } from '@/utils/constantes'
+import { PREFERENCIAL, STATUS } from '@/utils/constantes'
 import PadroesStatus from './PadroesStatus.vue'
+
+defineProps({
+  /** Mostra o selo de vaga preferencial (quando o mapa tem alguma). */
+  comPreferencial: { type: Boolean, default: false },
+})
 
 const prefixo = useId()
 </script>
@@ -20,6 +25,12 @@ const prefixo = useId()
       <v-icon :icon="status.icone" :color="status.cor" size="small" aria-hidden="true" />
       <span class="text-body-2">{{ status.rotulo }}</span>
     </li>
+    <li v-if="comPreferencial" class="d-flex align-center ga-2">
+      <span class="selo-preferencial" aria-hidden="true">
+        <v-icon :icon="PREFERENCIAL.icone" size="14" color="white" />
+      </span>
+      <span class="text-body-2">{{ PREFERENCIAL.rotulo }}</span>
+    </li>
   </ul>
 </template>
 
@@ -28,5 +39,15 @@ const prefixo = useId()
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.selo-preferencial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-preferencial));
 }
 </style>

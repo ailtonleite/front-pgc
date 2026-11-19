@@ -52,13 +52,16 @@ watch([estacionamentoId, cameraId], async ([estacionamento, id]) => {
   try {
     camera.value = (await camerasApi.listar(estacionamento)).find((c) => c.id === id) ?? null
   } catch {
-    // Só complementa o título e o aviso de monitoramento
+    // Só complementa o título
   }
 }, { immediate: true })
 
-/** Com a câmera em monitoramento, avisa antes de trocar as vagas (e seus ids). */
+/**
+ * As vagas existentes são enviadas com `id` e mantêm as sessões dos motoristas.
+ * Só remover uma vaga já salva encerra as sessões nela: aí pede confirmação.
+ */
 function pedirSalvar() {
-  if (camera.value?.ativa) confirmarSalvar.value = true
+  if (editor.removidas.value > 0) confirmarSalvar.value = true
   else salvar()
 }
 
@@ -170,8 +173,9 @@ onUnmounted(() => window.removeEventListener('beforeunload', aoFecharAba))
       texto-confirmar="Salvar"
       @confirmar="salvar"
     >
-      Esta câmera está em monitoramento. Salvar substitui todas as vagas e cria novos ids: os motoristas
-      que registraram uma vaga desta câmera perdem a referência a ela.
+      {{ editor.removidas.value === 1 ? 'Uma vaga já salva foi removida' : `${editor.removidas.value} vagas já salvas foram removidas` }}.
+      Os motoristas que registraram {{ editor.removidas.value === 1 ? 'essa vaga' : 'essas vagas' }} terão a sessão encerrada.
+      As demais vagas são mantidas.
     </ConfirmarDialog>
     <ConfirmarDialog
       v-model="confirmarSaida"

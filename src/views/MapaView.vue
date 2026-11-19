@@ -25,7 +25,7 @@ const route = useRoute()
 const { eAdmin, eMotorista } = storeToRefs(useAuthStore())
 const notificacao = useNotificacaoStore()
 const ocupacaoStore = useOcupacaoStore()
-const { vagas, vagasPorId, vagasPorCamera, totais, carregando } = storeToRefs(ocupacaoStore)
+const { vagas, vagasPorId, vagasPorCamera, totais, totaisPreferenciais, carregando } = storeToRefs(ocupacaoStore)
 const sessaoStore = useSessaoStore()
 const { sessao, vagaId: vagaDaSessao } = storeToRefs(sessaoStore)
 
@@ -152,7 +152,7 @@ async function encerrar() {
     </div>
 
     <CardMinhaVaga v-if="sessao" :sessao="sessao" class="mb-4" @encerrar="encerrar" />
-    <CardsTotais :totais="totais" :conectado="conectado" class="mb-4" />
+    <CardsTotais :totais="totais" :preferenciais="totaisPreferenciais" :conectado="conectado" class="mb-4" />
 
     <v-progress-linear v-if="carregando" indeterminate color="primary" />
 
@@ -205,7 +205,7 @@ async function encerrar() {
       </v-window>
     </v-card>
 
-    <LegendaStatus class="mt-4" />
+    <LegendaStatus :com-preferencial="totaisPreferenciais.total > 0" class="mt-4" />
 
     <DetalheVagaDialog
       v-model="dialogoAberto"

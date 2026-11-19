@@ -3,7 +3,7 @@
  * Detalhe da vaga clicada no mapa, com a opção "Estacionei aqui" (UC03).
  */
 import { computed, ref, watch } from 'vue'
-import { STATUS } from '@/utils/constantes'
+import { PREFERENCIAL, STATUS } from '@/utils/constantes'
 import { formatarDuracao } from '@/utils/datas'
 
 const props = defineProps({
@@ -40,6 +40,9 @@ const atualizacao = computed(() => {
       <v-card-text>
         <div class="d-flex flex-wrap ga-2 mb-3">
           <v-chip :color="status.cor" :prepend-icon="status.icone" variant="flat">{{ status.rotulo }}</v-chip>
+          <v-chip v-if="vaga.preferencial" color="preferencial" :prepend-icon="PREFERENCIAL.icone" variant="flat">
+            {{ PREFERENCIAL.rotulo }}
+          </v-chip>
           <v-chip v-if="eMinhaVaga" color="secondary" prepend-icon="mdi-car" variant="flat">Sua vaga</v-chip>
         </div>
         <p v-if="eMotorista && !eMinhaVaga && vaga.status === 'LIVRE'" class="text-body-2">

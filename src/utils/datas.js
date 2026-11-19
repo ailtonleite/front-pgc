@@ -43,6 +43,34 @@ export function fimDoDia(data) {
 }
 
 /**
+ * `"14:05"` (horário local), no formato do `<input type="time">`.
+ * @param {Date} data
+ * @returns {string}
+ */
+export function paraHoraMinuto(data) {
+  return `${doisDigitos(data.getHours())}:${doisDigitos(data.getMinutes())}`
+}
+
+/**
+ * O dia de `data` no horário `"HH:MM"` (não altera o original).
+ * Com `fimDoMinuto`, vai até o último milissegundo do minuto (`14:05` → 14:05:59.999),
+ * para o fim de um intervalo incluir o minuto inteiro.
+ * @param {Date} data
+ * @param {string} horaMinuto `"HH:MM"`; vazio ou inválido = `null`
+ * @param {{ fimDoMinuto?: boolean }} [opcoes]
+ * @returns {Date | null}
+ */
+export function comHora(data, horaMinuto, { fimDoMinuto = false } = {}) {
+  const partes = /^(\d{2}):(\d{2})$/.exec(horaMinuto ?? '')
+  if (!data || !partes) return null
+  const [horas, minutos] = [Number(partes[1]), Number(partes[2])]
+  if (horas > 23 || minutos > 59) return null
+  const resultado = new Date(data)
+  resultado.setHours(horas, minutos, fimDoMinuto ? 59 : 0, fimDoMinuto ? 999 : 0)
+  return resultado
+}
+
+/**
  * `"25/10/2026 14:30"`, no fuso do navegador.
  * @param {string | null} iso
  * @returns {string} `"—"` se vazio ou inválido

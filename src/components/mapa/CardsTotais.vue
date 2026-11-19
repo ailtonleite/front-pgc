@@ -3,6 +3,7 @@
  * Totais de vagas. A região é `aria-live` para leitores de tela anunciarem as mudanças.
  */
 import { computed } from 'vue'
+import { PREFERENCIAL, STATUS } from '@/utils/constantes'
 import { formatarPercentual } from '@/utils/datas'
 
 const props = defineProps({
@@ -11,6 +12,14 @@ const props = defineProps({
   conectado: { type: Boolean, default: true },
   /** Versão reduzida, usada nos cards da lista de estacionamentos. */
   compacto: { type: Boolean, default: false },
+  /** Mesmo formato de `totais`, só das vagas preferenciais. Exibido quando houver alguma. */
+  preferenciais: { type: Object, default: null },
+})
+
+const resumoPreferenciais = computed(() => {
+  const { livres, ocupadas, total } = props.preferenciais ?? {}
+  return `${total} ${total === 1 ? 'vaga preferencial' : 'vagas preferenciais'}: `
+    + `${livres} ${livres === 1 ? 'livre' : 'livres'}, ${ocupadas} ${ocupadas === 1 ? 'ocupada' : 'ocupadas'}`
 })
 
 const resumo = computed(() => {
@@ -76,12 +85,51 @@ const percentual = computed(() => props.totais.taxa_ocupacao * 100)
             </v-card-text>
           </v-card>
         </v-col>
+        <v-col v-if="preferenciais?.total" cols="12">
+          <v-card variant="tonal" color="preferencial">
+            <v-card-text class="preferenciais d-flex flex-wrap align-center">
+              <div class="d-flex align-center ga-3">
+                <v-icon :icon="PREFERENCIAL.icone" size="32" aria-hidden="true" />
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold">Vagas preferenciais</div>
+                  <div class="text-body-2">{{ preferenciais.total }} no total</div>
+                </div>
+              </div>
+              <!-- Os números ficam em texto para leitores de tela; os ícones são decorativos -->
+              <span class="sr-only">{{ resumoPreferenciais }}</span>
+              <div class="d-flex align-center ga-2" aria-hidden="true">
+                <v-icon :icon="STATUS.LIVRE.icone" color="livre" />
+                <span class="text-h5 font-weight-bold">{{ preferenciais.livres }}</span>
+                <span class="text-body-2">{{ preferenciais.livres === 1 ? 'livre' : 'livres' }}</span>
+              </div>
+              <div class="d-flex align-center ga-2" aria-hidden="true">
+                <v-icon :icon="STATUS.OCUPADA.icone" color="ocupada" />
+                <span class="text-h5 font-weight-bold">{{ preferenciais.ocupadas }}</span>
+                <span class="text-body-2">{{ preferenciais.ocupadas === 1 ? 'ocupada' : 'ocupadas' }}</span>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
       </v-row>
     </template>
   </div>
 </template>
 
 <style scoped>
+.preferenciais {
+  column-gap: 32px;
+  row-gap: 8px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .indicador {
   display: inline-block;
   width: 10px;
